@@ -1,73 +1,79 @@
 import React from "react";
 
 import { useForm } from "react-hook-form";
-import {
-  FormErrorMessage,
-  FormLabel,
-  FormControl,
-  Input,
-  Button,
-} from "@chakra-ui/core";
+import { Button } from "@chakra-ui/core";
+import Wrapper from "../components/Wrapper";
+import InputField from "../components/InputField";
+import { useRegisterMutation } from "../generated/graphql";
 
-interface registerProps {}
+interface RegisterProps {}
 
-export const Register: React.FC<registerProps> = ({}) => {
-  const { handleSubmit, errors, register, formState } = useForm();
+const toErrorMap = (validationErrors) => {
+  const errorMap = {};
+  validationErrors.forEach((validationError) => {
+    errorMap[validationError.property] = "testing";
+  });
+};
 
-  function validateUsername(value) {
-    let error;
-    if (!value) {
-      error = "Name is required";
+export const Register: React.FC<RegisterProps> = ({}) => {
+  const { handleSubmit, formState, errors, register, setError } = useForm();
+  const [, registerUser] = useRegisterMutation();
+
+  const onSubmit = async (values: any) => {
+    const response = await registerUser(values);
+    if (response.error) {
+      setError(
+        toErrorMap(response.error.graphQLErrors[0].extensions.validationErrors)
+      );
     }
-    return error || true;
-  }
-
-  function validatePassword(value) {
-    let error;
-    if (!value) {
-      error = "Password is required";
-    }
-    if (value.length < 8) {
-      error = "Password must be at least 8 characters long";
-    }
-    return error || true;
-  }
-
-  function onSubmit(values) {
-    console.log(values);
-  }
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <FormControl isInvalid={errors.name}>
-        <FormLabel htmlFor="username">Username</FormLabel>
-        <Input
-          name="username"
-          placeholder="username"
-          ref={register({ validate: validateUsername })}
+    <Wrapper variant="small">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <InputField
+          name="firstName"
+          label="First Name"
+          errors={errors}
+          inputRefs={register({
+            required: "First Name Required",
+          })}
         />
-        <FormErrorMessage>
-          {errors.username && errors.username.message}
-        </FormErrorMessage>
-        <FormLabel htmlFor="password">Password</FormLabel>
-        <Input
+        <InputField
+          name="lastName"
+          label="Last Name"
+          errors={errors}
+          inputRefs={register({
+            required: "Last Name Required",
+          })}
+        />
+        <InputField
+          name="email"
+          label="Email"
+          errors={errors}
+          inputRefs={register({
+            required: "Email Required",
+          })}
+        />
+        <InputField
           name="password"
-          placeholder="password"
-          ref={register({ validate: validatePassword })}
+          label="Password"
+          errors={errors}
+          type="password"
+          inputRefs={register({
+            required: "Password Required",
+          })}
         />
-        <FormErrorMessage>
-          {errors.password && errors.password.message}
-        </FormErrorMessage>
-      </FormControl>
-      <Button
-        mt={4}
-        variantColor="teal"
-        isLoading={formState.isSubmitting}
-        type="submit"
-      >
-        Submit
-      </Button>
-    </form>
+        <Button
+          mt={4}
+          variantColor="teal"
+          isLoading={formState.isSubmitting}
+          type="submit"
+        >
+          Register
+        </Button>
+      </form>
+    </Wrapper>
   );
 };
 
