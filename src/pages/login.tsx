@@ -4,12 +4,13 @@ import { useForm } from "react-hook-form";
 import { Button } from "@chakra-ui/core";
 import Wrapper from "../components/Wrapper";
 import InputField from "../components/InputField";
-import { useRegisterMutation } from "../generated/graphql";
+import { useLoginMutation } from "../generated/graphql";
+import { useRouter } from "next/router";
 import { Alert, AlertIcon } from "@chakra-ui/core";
 
-interface RegisterProps {}
+interface LoginProps {}
 
-export const Register: React.FC<RegisterProps> = ({}) => {
+export const Login: React.FC<LoginProps> = ({}) => {
   const {
     handleSubmit,
     formState,
@@ -18,12 +19,13 @@ export const Register: React.FC<RegisterProps> = ({}) => {
     setError,
     clearErrors,
   } = useForm();
-  const [, registerUser] = useRegisterMutation();
-  const [alert, setAlert] = useState<String | null>(null);
+  const [, login] = useLoginMutation();
+  const router = useRouter();
+  const [alert, setAlert] = useState<string | null>(null);
 
   const onSubmit = async (values: any) => {
     clearErrors();
-    const response = await registerUser(values);
+    const response = await login(values);
     if (response.error) {
       const validationErrors =
         response.error.graphQLErrors[0].extensions.exception.validationErrors;
@@ -33,8 +35,10 @@ export const Register: React.FC<RegisterProps> = ({}) => {
           message: Object.values(validationError.constraints)[0] as string,
         });
       });
+    } else if (response.data.login) {
+      router.push("/");
     } else {
-      setAlert(`A confirmation email has been sent to ${values.email}`);
+      setAlert("Incorrect username or password");
       setTimeout(() => setAlert(null), 5000);
     }
   };
@@ -42,28 +46,12 @@ export const Register: React.FC<RegisterProps> = ({}) => {
   return (
     <Wrapper variant="small">
       {alert && (
-        <Alert status="info">
+        <Alert status="error">
           <AlertIcon />
           {alert}
         </Alert>
       )}
       <form onSubmit={handleSubmit(onSubmit)}>
-        <InputField
-          name="firstName"
-          label="First Name"
-          errors={errors}
-          inputRefs={register({
-            required: "First Name Required",
-          })}
-        />
-        <InputField
-          name="lastName"
-          label="Last Name"
-          errors={errors}
-          inputRefs={register({
-            required: "Last Name Required",
-          })}
-        />
         <InputField
           name="email"
           label="Email"
@@ -87,11 +75,11 @@ export const Register: React.FC<RegisterProps> = ({}) => {
           isLoading={formState.isSubmitting}
           type="submit"
         >
-          Register
+          Login
         </Button>
       </form>
     </Wrapper>
   );
 };
 
-export default Register;
+export default Login;

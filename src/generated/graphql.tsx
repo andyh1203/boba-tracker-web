@@ -123,6 +123,34 @@ export type MutationRegisterArgs = {
   data: RegisterUserInput;
 };
 
+export type ConfirmMutationVariables = Exact<{
+  token: Scalars['String'];
+}>;
+
+
+export type ConfirmMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'confirmUser'>
+);
+
+export type LoginMutationVariables = Exact<{
+  email: Scalars['String'];
+  password: Scalars['String'];
+}>;
+
+
+export type LoginMutation = (
+  { __typename?: 'Mutation' }
+  & { login?: Maybe<(
+    { __typename?: 'User' }
+    & Pick<User, 'firstName' | 'lastName'>
+    & { bobas: Array<(
+      { __typename?: 'Boba' }
+      & Pick<Boba, 'drinkName' | 'iceLevel' | 'sugarLevel'>
+    )> }
+  )> }
+);
+
 export type RegisterMutationVariables = Exact<{
   firstName: Scalars['String'];
   lastName: Scalars['String'];
@@ -135,15 +163,40 @@ export type RegisterMutation = (
   { __typename?: 'Mutation' }
   & { register: (
     { __typename?: 'User' }
-    & Pick<User, '_id' | 'firstName' | 'lastName' | 'email'>
+    & Pick<User, 'firstName' | 'lastName' | 'email'>
   ) }
 );
 
 
+export const ConfirmDocument = gql`
+    mutation Confirm($token: String!) {
+  confirmUser(token: $token)
+}
+    `;
+
+export function useConfirmMutation() {
+  return Urql.useMutation<ConfirmMutation, ConfirmMutationVariables>(ConfirmDocument);
+};
+export const LoginDocument = gql`
+    mutation Login($email: String!, $password: String!) {
+  login(email: $email, password: $password) {
+    firstName
+    lastName
+    bobas {
+      drinkName
+      iceLevel
+      sugarLevel
+    }
+  }
+}
+    `;
+
+export function useLoginMutation() {
+  return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+};
 export const RegisterDocument = gql`
     mutation Register($firstName: String!, $lastName: String!, $email: String!, $password: String!) {
   register(data: {firstName: $firstName, lastName: $lastName, email: $email, password: $password}) {
-    _id
     firstName
     lastName
     email
