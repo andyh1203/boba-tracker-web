@@ -12,8 +12,6 @@ mutation Register(
       password: $password
     }
   ) {
-    firstName
-    lastName
-    email
+    ...CommonUser
   }
 }
