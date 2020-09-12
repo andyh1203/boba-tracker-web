@@ -1,0 +1,8 @@
+query Bobas {
+  bobas {
+    _id
+    drinkName
+    sugarLevel
+    iceLevel
+  }
+}

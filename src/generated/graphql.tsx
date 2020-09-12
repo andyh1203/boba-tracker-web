@@ -128,6 +128,20 @@ export type CommonUserFragment = (
   & Pick<User, '_id' | 'email' | 'firstName' | 'lastName'>
 );
 
+export type ChangePasswordMutationVariables = Exact<{
+  password: Scalars['String'];
+  token: Scalars['String'];
+}>;
+
+
+export type ChangePasswordMutation = (
+  { __typename?: 'Mutation' }
+  & { changePassword?: Maybe<(
+    { __typename?: 'User' }
+    & CommonUserFragment
+  )> }
+);
+
 export type ConfirmMutationVariables = Exact<{
   token: Scalars['String'];
 }>;
@@ -180,6 +194,17 @@ export type RegisterMutation = (
   ) }
 );
 
+export type BobasQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BobasQuery = (
+  { __typename?: 'Query' }
+  & { bobas: Array<(
+    { __typename?: 'Boba' }
+    & Pick<Boba, '_id' | 'drinkName' | 'sugarLevel' | 'iceLevel'>
+  )> }
+);
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -199,6 +224,17 @@ export const CommonUserFragmentDoc = gql`
   lastName
 }
     `;
+export const ChangePasswordDocument = gql`
+    mutation ChangePassword($password: String!, $token: String!) {
+  changePassword(data: {password: $password, token: $token}) {
+    ...CommonUser
+  }
+}
+    ${CommonUserFragmentDoc}`;
+
+export function useChangePasswordMutation() {
+  return Urql.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument);
+};
 export const ConfirmDocument = gql`
     mutation Confirm($token: String!) {
   confirmUser(token: $token)
@@ -243,6 +279,20 @@ export const RegisterDocument = gql`
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const BobasDocument = gql`
+    query Bobas {
+  bobas {
+    _id
+    drinkName
+    sugarLevel
+    iceLevel
+  }
+}
+    `;
+
+export function useBobasQuery(options: Omit<Urql.UseQueryArgs<BobasQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<BobasQuery>({ query: BobasDocument, ...options });
 };
 export const MeDocument = gql`
     query Me {

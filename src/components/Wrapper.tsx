@@ -5,7 +5,10 @@ interface WrapperProps {
   variant?: "small" | "regular";
 }
 
-const Wrapper: React.FC<WrapperProps> = ({ children, variant = "regular" }) => {
+export const Wrapper: React.FC<WrapperProps> = ({
+  children,
+  variant = "regular",
+}) => {
   return (
     <Box
       maxW={variant === "regular" ? "800px" : "400px"}
@@ -17,5 +20,3 @@ const Wrapper: React.FC<WrapperProps> = ({ children, variant = "regular" }) => {
     </Box>
   );
 };
-
-export default Wrapper;

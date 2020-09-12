@@ -14,7 +14,7 @@ interface InputFieldProps {
   type?: string;
 }
 
-const InputField: React.FC<InputFieldProps> = ({
+export const InputField: React.FC<InputFieldProps> = ({
   errors,
   inputRefs,
   ...props
@@ -29,5 +29,3 @@ const InputField: React.FC<InputFieldProps> = ({
     </FormControl>
   );
 };
-
-export default InputField;

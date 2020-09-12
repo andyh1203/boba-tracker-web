@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useConfirmMutation } from "../../generated/graphql";
 import { useRouter } from "next/router";
+import { withUrqlClient } from "next-urql";
+import { createUrqlClient } from "../../utils/createUrqlClient";
 
 interface ConfirmProps {}
 
@@ -9,13 +11,13 @@ const Confirm: React.FC<ConfirmProps> = ({}) => {
   const token = router.query.token as string;
 
   const [, confirm] = useConfirmMutation();
-  const [confirmed, setConfirmed] = useState(null);
+  const [confirmed, setConfirmed] = useState<Boolean | null>(null);
 
   useEffect(() => {
     const confirmation = async () => {
       if (token) {
         const response = await confirm({ token });
-        if (response.data.confirmUser) {
+        if (response.data?.confirmUser) {
           setConfirmed(true);
           router.push("/login");
         } else {
@@ -39,4 +41,4 @@ const Confirm: React.FC<ConfirmProps> = ({}) => {
   );
 };
 
-export default Confirm;
+export default withUrqlClient(createUrqlClient)(Confirm);
