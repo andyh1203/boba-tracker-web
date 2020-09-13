@@ -26,13 +26,12 @@ export const Register: React.FC<RegisterProps> = ({}) => {
   const onSubmit = async (values: any) => {
     clearErrors();
     const response = await registerUser(values);
-    if (response.error) {
-      const validationErrors =
-        response.error.graphQLErrors[0].extensions?.exception.validationErrors;
-      validationErrors.forEach((validationError: any) => {
-        setError(validationError.property, {
-          type: "validation",
-          message: Object.values(validationError.constraints)[0] as string,
+    if (response.data?.register.errors) {
+      response.data?.register.errors.forEach((error: any) => {
+        const { field, type, message } = error;
+        setError(field, {
+          type,
+          message,
         });
       });
     } else {

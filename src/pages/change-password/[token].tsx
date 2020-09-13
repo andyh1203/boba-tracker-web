@@ -13,7 +13,6 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
   const { handleSubmit, formState, errors, register, setError } = useForm();
 
   const [, changePassword] = useChangePasswordMutation();
-  const [alert, setAlert] = useState<string | null>(null);
 
   const onSubmit = async ({ password, confirmNewPassword }: any) => {
     if (password !== confirmNewPassword) {
@@ -23,19 +22,27 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
       });
     }
     const response = await changePassword({ password, token });
-    if (response.data?.changePassword) {
-      setAlert("Successfully changed password!");
+    if (response.data?.changePassword?.errors) {
+      response.data?.changePassword?.errors.forEach((error: any) => {
+        const { field, type, message } = error;
+        setError(field, {
+          type,
+          message,
+        });
+      });
     }
+    changePassword({ password, token });
+    console.log("Changed pwd success");
   };
 
   return (
     <Wrapper variant="small">
-      {alert && (
+      {/* {alert && (
         <Alert status="info">
           <AlertIcon />
           {alert}
         </Alert>
-      )}
+      )} */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <InputField
           name="password"
@@ -69,7 +76,6 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
 };
 
 ChangePassword.getInitialProps = ({ query }) => {
-  console.log(query);
   return {
     token: query.token as string,
   };

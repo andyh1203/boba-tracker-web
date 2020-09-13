@@ -28,19 +28,18 @@ export const Login: React.FC<LoginProps> = ({}) => {
   const onSubmit = async (values: any) => {
     clearErrors();
     const response = await login(values);
-    if (response.error) {
-      const validationErrors =
-        response.error.graphQLErrors[0].extensions?.exception.validationErrors;
-      validationErrors.forEach((validationError: any) => {
-        setError(validationError.property, {
-          type: "validation",
-          message: Object.values(validationError.constraints)[0] as string,
+    if (response.data?.login?.errors) {
+      response.data?.login?.errors.forEach((error: any) => {
+        const { field, type, message } = error;
+        setError(field, {
+          type,
+          message,
         });
       });
-    } else if (response.data?.login) {
+    } else if (response.data?.login?.user) {
       router.push("/");
     } else {
-      setAlert("Incorrect username or password");
+      setAlert("Something went wrong");
       setTimeout(() => setAlert(null), 5000);
     }
   };

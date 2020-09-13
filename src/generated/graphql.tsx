@@ -32,6 +32,37 @@ export type Boba = {
   user: User;
 };
 
+export type FieldError = {
+  __typename?: 'FieldError';
+  type: Scalars['String'];
+  field: Scalars['String'];
+  message: Scalars['String'];
+};
+
+export type BobaResponse = {
+  __typename?: 'BobaResponse';
+  errors?: Maybe<Array<FieldError>>;
+  boba?: Maybe<Boba>;
+};
+
+export type UserResponse = {
+  __typename?: 'UserResponse';
+  errors?: Maybe<Array<FieldError>>;
+  user?: Maybe<User>;
+};
+
+export type UsersResponse = {
+  __typename?: 'UsersResponse';
+  errors?: Maybe<Array<FieldError>>;
+  users?: Maybe<Array<User>>;
+};
+
+export type BaseBobaInput = {
+  drinkName: Scalars['String'];
+  sugarLevel: Scalars['String'];
+  iceLevel: Scalars['String'];
+};
+
 export type AddBobaInput = {
   drinkName: Scalars['String'];
   sugarLevel: Scalars['String'];
@@ -39,46 +70,31 @@ export type AddBobaInput = {
   userId: Scalars['String'];
 };
 
-export type UpdateBobaInput = {
-  drinkName?: Maybe<Scalars['String']>;
-  sugarLevel?: Maybe<Scalars['String']>;
-  iceLevel?: Maybe<Scalars['String']>;
-};
-
-export type PasswordInput = {
-  password: Scalars['String'];
-};
-
-export type ChangePasswordInput = {
-  password: Scalars['String'];
-  token: Scalars['String'];
-};
-
 export type RegisterUserInput = {
-  password: Scalars['String'];
   firstName: Scalars['String'];
   lastName: Scalars['String'];
   email: Scalars['String'];
+  password: Scalars['String'];
 };
 
 export type Query = {
   __typename?: 'Query';
   bobas: Array<Boba>;
-  users: Array<User>;
+  users: UsersResponse;
   me?: Maybe<User>;
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addBoba: Boba;
+  addBoba: BobaResponse;
   deleteBoba: Scalars['Boolean'];
-  updateBoba: Boba;
-  changePassword?: Maybe<User>;
+  updateBoba: BobaResponse;
+  login?: Maybe<UserResponse>;
+  changePassword?: Maybe<UserResponse>;
   confirmUser: Scalars['Boolean'];
   forgotPassword: Scalars['Boolean'];
-  login?: Maybe<User>;
   logout: Scalars['Boolean'];
-  register: User;
+  register: UserResponse;
 };
 
 
@@ -93,13 +109,20 @@ export type MutationDeleteBobaArgs = {
 
 
 export type MutationUpdateBobaArgs = {
-  updatedInput: UpdateBobaInput;
+  updatedInput: BaseBobaInput;
   bobaId: Scalars['String'];
 };
 
 
+export type MutationLoginArgs = {
+  password: Scalars['String'];
+  email: Scalars['String'];
+};
+
+
 export type MutationChangePasswordArgs = {
-  data: ChangePasswordInput;
+  password: Scalars['String'];
+  token: Scalars['String'];
 };
 
 
@@ -109,12 +132,6 @@ export type MutationConfirmUserArgs = {
 
 
 export type MutationForgotPasswordArgs = {
-  email: Scalars['String'];
-};
-
-
-export type MutationLoginArgs = {
-  password: Scalars['String'];
   email: Scalars['String'];
 };
 
@@ -137,8 +154,14 @@ export type ChangePasswordMutationVariables = Exact<{
 export type ChangePasswordMutation = (
   { __typename?: 'Mutation' }
   & { changePassword?: Maybe<(
-    { __typename?: 'User' }
-    & CommonUserFragment
+    { __typename?: 'UserResponse' }
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & Pick<FieldError, 'type' | 'field' | 'message'>
+    )>>, user?: Maybe<(
+      { __typename?: 'User' }
+      & CommonUserFragment
+    )> }
   )> }
 );
 
@@ -161,12 +184,18 @@ export type LoginMutationVariables = Exact<{
 export type LoginMutation = (
   { __typename?: 'Mutation' }
   & { login?: Maybe<(
-    { __typename?: 'User' }
-    & { bobas: Array<(
-      { __typename?: 'Boba' }
-      & Pick<Boba, 'drinkName' | 'iceLevel' | 'sugarLevel'>
+    { __typename?: 'UserResponse' }
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & Pick<FieldError, 'type' | 'field' | 'message'>
+    )>>, user?: Maybe<(
+      { __typename?: 'User' }
+      & { bobas: Array<(
+        { __typename?: 'Boba' }
+        & Pick<Boba, 'drinkName' | 'iceLevel' | 'sugarLevel'>
+      )> }
+      & CommonUserFragment
     )> }
-    & CommonUserFragment
   )> }
 );
 
@@ -189,8 +218,14 @@ export type RegisterMutationVariables = Exact<{
 export type RegisterMutation = (
   { __typename?: 'Mutation' }
   & { register: (
-    { __typename?: 'User' }
-    & CommonUserFragment
+    { __typename?: 'UserResponse' }
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & Pick<FieldError, 'type' | 'field' | 'message'>
+    )>>, user?: Maybe<(
+      { __typename?: 'User' }
+      & CommonUserFragment
+    )> }
   ) }
 );
 
@@ -226,8 +261,15 @@ export const CommonUserFragmentDoc = gql`
     `;
 export const ChangePasswordDocument = gql`
     mutation ChangePassword($password: String!, $token: String!) {
-  changePassword(data: {password: $password, token: $token}) {
-    ...CommonUser
+  changePassword(password: $password, token: $token) {
+    errors {
+      type
+      field
+      message
+    }
+    user {
+      ...CommonUser
+    }
   }
 }
     ${CommonUserFragmentDoc}`;
@@ -247,11 +289,18 @@ export function useConfirmMutation() {
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
-    ...CommonUser
-    bobas {
-      drinkName
-      iceLevel
-      sugarLevel
+    errors {
+      type
+      field
+      message
+    }
+    user {
+      ...CommonUser
+      bobas {
+        drinkName
+        iceLevel
+        sugarLevel
+      }
     }
   }
 }
@@ -272,7 +321,14 @@ export function useLogoutMutation() {
 export const RegisterDocument = gql`
     mutation Register($firstName: String!, $lastName: String!, $email: String!, $password: String!) {
   register(data: {firstName: $firstName, lastName: $lastName, email: $email, password: $password}) {
-    ...CommonUser
+    errors {
+      type
+      field
+      message
+    }
+    user {
+      ...CommonUser
+    }
   }
 }
     ${CommonUserFragmentDoc}`;
