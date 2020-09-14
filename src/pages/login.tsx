@@ -6,9 +6,10 @@ import { Wrapper } from "../components/Wrapper";
 import { InputField } from "../components/InputField";
 import { useLoginMutation } from "../generated/graphql";
 import { useRouter } from "next/router";
-import { Alert, AlertIcon } from "@chakra-ui/core";
+import { Alert, AlertIcon, Box, Flex, Link } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
+import NextLink from "next/link";
 
 interface LoginProps {}
 
@@ -70,6 +71,13 @@ export const Login: React.FC<LoginProps> = ({}) => {
             required: "Password Required",
           })}
         />
+        <Flex ml={2}>
+          <Box ml="auto">
+            <NextLink href="/forgot-password">
+              <Link ml="auto">Forgot password?</Link>
+            </NextLink>
+          </Box>
+        </Flex>
         <Button
           mt={4}
           variantColor="teal"

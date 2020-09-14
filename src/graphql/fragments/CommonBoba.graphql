@@ -1,0 +1,6 @@
+fragment CommonBoba on Boba {
+  _id
+  drinkName
+  sugarLevel
+  iceLevel
+}

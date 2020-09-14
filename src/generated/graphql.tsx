@@ -140,9 +140,34 @@ export type MutationRegisterArgs = {
   data: RegisterUserInput;
 };
 
+export type CommonBobaFragment = (
+  { __typename?: 'Boba' }
+  & Pick<Boba, '_id' | 'drinkName' | 'sugarLevel' | 'iceLevel'>
+);
+
+export type CommonErrorFragment = (
+  { __typename?: 'FieldError' }
+  & Pick<FieldError, 'type' | 'field' | 'message'>
+);
+
 export type CommonUserFragment = (
   { __typename?: 'User' }
   & Pick<User, '_id' | 'email' | 'firstName' | 'lastName'>
+  & { bobas: Array<(
+    { __typename?: 'Boba' }
+    & CommonBobaFragment
+  )> }
+);
+
+export type CommonUserResponseFragment = (
+  { __typename?: 'UserResponse' }
+  & { errors?: Maybe<Array<(
+    { __typename?: 'FieldError' }
+    & CommonErrorFragment
+  )>>, user?: Maybe<(
+    { __typename?: 'User' }
+    & CommonUserFragment
+  )> }
 );
 
 export type ChangePasswordMutationVariables = Exact<{
@@ -175,6 +200,16 @@ export type ConfirmMutation = (
   & Pick<Mutation, 'confirmUser'>
 );
 
+export type ForgotPasswordMutationVariables = Exact<{
+  email: Scalars['String'];
+}>;
+
+
+export type ForgotPasswordMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'forgotPassword'>
+);
+
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
@@ -185,17 +220,7 @@ export type LoginMutation = (
   { __typename?: 'Mutation' }
   & { login?: Maybe<(
     { __typename?: 'UserResponse' }
-    & { errors?: Maybe<Array<(
-      { __typename?: 'FieldError' }
-      & Pick<FieldError, 'type' | 'field' | 'message'>
-    )>>, user?: Maybe<(
-      { __typename?: 'User' }
-      & { bobas: Array<(
-        { __typename?: 'Boba' }
-        & Pick<Boba, 'drinkName' | 'iceLevel' | 'sugarLevel'>
-      )> }
-      & CommonUserFragment
-    )> }
+    & CommonUserResponseFragment
   )> }
 );
 
@@ -219,13 +244,7 @@ export type RegisterMutation = (
   { __typename?: 'Mutation' }
   & { register: (
     { __typename?: 'UserResponse' }
-    & { errors?: Maybe<Array<(
-      { __typename?: 'FieldError' }
-      & Pick<FieldError, 'type' | 'field' | 'message'>
-    )>>, user?: Maybe<(
-      { __typename?: 'User' }
-      & CommonUserFragment
-    )> }
+    & CommonUserResponseFragment
   ) }
 );
 
@@ -236,7 +255,7 @@ export type BobasQuery = (
   { __typename?: 'Query' }
   & { bobas: Array<(
     { __typename?: 'Boba' }
-    & Pick<Boba, '_id' | 'drinkName' | 'sugarLevel' | 'iceLevel'>
+    & CommonBobaFragment
   )> }
 );
 
@@ -251,14 +270,43 @@ export type MeQuery = (
   )> }
 );
 
+export const CommonErrorFragmentDoc = gql`
+    fragment CommonError on FieldError {
+  type
+  field
+  message
+}
+    `;
+export const CommonBobaFragmentDoc = gql`
+    fragment CommonBoba on Boba {
+  _id
+  drinkName
+  sugarLevel
+  iceLevel
+}
+    `;
 export const CommonUserFragmentDoc = gql`
     fragment CommonUser on User {
   _id
   email
   firstName
   lastName
+  bobas {
+    ...CommonBoba
+  }
 }
-    `;
+    ${CommonBobaFragmentDoc}`;
+export const CommonUserResponseFragmentDoc = gql`
+    fragment CommonUserResponse on UserResponse {
+  errors {
+    ...CommonError
+  }
+  user {
+    ...CommonUser
+  }
+}
+    ${CommonErrorFragmentDoc}
+${CommonUserFragmentDoc}`;
 export const ChangePasswordDocument = gql`
     mutation ChangePassword($password: String!, $token: String!) {
   changePassword(password: $password, token: $token) {
@@ -286,25 +334,22 @@ export const ConfirmDocument = gql`
 export function useConfirmMutation() {
   return Urql.useMutation<ConfirmMutation, ConfirmMutationVariables>(ConfirmDocument);
 };
+export const ForgotPasswordDocument = gql`
+    mutation ForgotPassword($email: String!) {
+  forgotPassword(email: $email)
+}
+    `;
+
+export function useForgotPasswordMutation() {
+  return Urql.useMutation<ForgotPasswordMutation, ForgotPasswordMutationVariables>(ForgotPasswordDocument);
+};
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
-    errors {
-      type
-      field
-      message
-    }
-    user {
-      ...CommonUser
-      bobas {
-        drinkName
-        iceLevel
-        sugarLevel
-      }
-    }
+    ...CommonUserResponse
   }
 }
-    ${CommonUserFragmentDoc}`;
+    ${CommonUserResponseFragmentDoc}`;
 
 export function useLoginMutation() {
   return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
@@ -321,17 +366,10 @@ export function useLogoutMutation() {
 export const RegisterDocument = gql`
     mutation Register($firstName: String!, $lastName: String!, $email: String!, $password: String!) {
   register(data: {firstName: $firstName, lastName: $lastName, email: $email, password: $password}) {
-    errors {
-      type
-      field
-      message
-    }
-    user {
-      ...CommonUser
-    }
+    ...CommonUserResponse
   }
 }
-    ${CommonUserFragmentDoc}`;
+    ${CommonUserResponseFragmentDoc}`;
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
@@ -339,13 +377,10 @@ export function useRegisterMutation() {
 export const BobasDocument = gql`
     query Bobas {
   bobas {
-    _id
-    drinkName
-    sugarLevel
-    iceLevel
+    ...CommonBoba
   }
 }
-    `;
+    ${CommonBobaFragmentDoc}`;
 
 export function useBobasQuery(options: Omit<Urql.UseQueryArgs<BobasQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<BobasQuery>({ query: BobasDocument, ...options });

@@ -3,4 +3,7 @@ fragment CommonUser on User {
   email
   firstName
   lastName
+  bobas {
+    ...CommonBoba
+  }
 }
