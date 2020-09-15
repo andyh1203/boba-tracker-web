@@ -38,7 +38,11 @@ export const Login: React.FC<LoginProps> = ({}) => {
         });
       });
     } else if (response.data?.login?.user) {
-      router.push("/");
+      if (typeof router.query.next === "string") {
+        router.push(router.query.next);
+      } else {
+        router.push("/");
+      }
     } else {
       setAlert("Something went wrong");
       setTimeout(() => setAlert(null), 5000);

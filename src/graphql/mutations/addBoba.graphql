@@ -1,0 +1,25 @@
+mutation AddBoba(
+  $drinkName: String!
+  $sugarLevel: String!
+  $iceLevel: String!
+) {
+  addBoba(
+    data: {
+      drinkName: $drinkName
+      sugarLevel: $sugarLevel
+      iceLevel: $iceLevel
+    }
+  ) {
+    errors {
+      type
+      field
+      message
+    }
+    boba {
+      _id
+      drinkName
+      sugarLevel
+      iceLevel
+    }
+  }
+}

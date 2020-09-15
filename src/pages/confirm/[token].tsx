@@ -1,32 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useConfirmMutation } from "../../generated/graphql";
 import { useRouter } from "next/router";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../../utils/createUrqlClient";
-import { NextPage } from "next";
 
-const Confirm: NextPage<{ token: string }> = ({ token }) => {
+const Confirm: React.FC<{}> = () => {
   const router = useRouter();
 
   const [, confirm] = useConfirmMutation();
 
   useEffect(() => {
     const confirmation = async () => {
-      if (token) {
-        await confirm({ token });
+      if (router.query.token) {
+        await confirm({
+          token:
+            typeof router.query.token === "string" ? router.query.token : "",
+        });
         router.push("/login");
       }
     };
     confirmation();
-  }, [token]);
+  }, [router.query.token]);
 
   return <></>;
-};
-
-Confirm.getInitialProps = ({ query }) => {
-  return {
-    token: query.token as string,
-  };
 };
 
 export default withUrqlClient(createUrqlClient)(Confirm);

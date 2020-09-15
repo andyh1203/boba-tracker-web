@@ -10,6 +10,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
+  DateTime: any;
 };
 
 export type User = {
@@ -18,9 +20,11 @@ export type User = {
   firstName: Scalars['String'];
   lastName: Scalars['String'];
   email: Scalars['String'];
-  fullName: Scalars['String'];
   bobas: Array<Boba>;
+  createdAt: Scalars['DateTime'];
+  updatedAt: Scalars['DateTime'];
 };
+
 
 export type Boba = {
   __typename?: 'Boba';
@@ -28,8 +32,9 @@ export type Boba = {
   drinkName: Scalars['String'];
   sugarLevel: Scalars['String'];
   iceLevel: Scalars['String'];
-  fullName: Scalars['String'];
   user: User;
+  createdAt: Scalars['DateTime'];
+  updatedAt: Scalars['DateTime'];
 };
 
 export type FieldError = {
@@ -57,17 +62,10 @@ export type UsersResponse = {
   users?: Maybe<Array<User>>;
 };
 
-export type BaseBobaInput = {
+export type BobaInput = {
   drinkName: Scalars['String'];
   sugarLevel: Scalars['String'];
   iceLevel: Scalars['String'];
-};
-
-export type AddBobaInput = {
-  drinkName: Scalars['String'];
-  sugarLevel: Scalars['String'];
-  iceLevel: Scalars['String'];
-  userId: Scalars['String'];
 };
 
 export type RegisterUserInput = {
@@ -99,7 +97,7 @@ export type Mutation = {
 
 
 export type MutationAddBobaArgs = {
-  data: AddBobaInput;
+  data: BobaInput;
 };
 
 
@@ -109,7 +107,7 @@ export type MutationDeleteBobaArgs = {
 
 
 export type MutationUpdateBobaArgs = {
-  updatedInput: BaseBobaInput;
+  updatedInput: BobaInput;
   bobaId: Scalars['String'];
 };
 
@@ -168,6 +166,27 @@ export type CommonUserResponseFragment = (
     { __typename?: 'User' }
     & CommonUserFragment
   )> }
+);
+
+export type AddBobaMutationVariables = Exact<{
+  drinkName: Scalars['String'];
+  sugarLevel: Scalars['String'];
+  iceLevel: Scalars['String'];
+}>;
+
+
+export type AddBobaMutation = (
+  { __typename?: 'Mutation' }
+  & { addBoba: (
+    { __typename?: 'BobaResponse' }
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & Pick<FieldError, 'type' | 'field' | 'message'>
+    )>>, boba?: Maybe<(
+      { __typename?: 'Boba' }
+      & Pick<Boba, '_id' | 'drinkName' | 'sugarLevel' | 'iceLevel'>
+    )> }
+  ) }
 );
 
 export type ChangePasswordMutationVariables = Exact<{
@@ -307,6 +326,27 @@ export const CommonUserResponseFragmentDoc = gql`
 }
     ${CommonErrorFragmentDoc}
 ${CommonUserFragmentDoc}`;
+export const AddBobaDocument = gql`
+    mutation AddBoba($drinkName: String!, $sugarLevel: String!, $iceLevel: String!) {
+  addBoba(data: {drinkName: $drinkName, sugarLevel: $sugarLevel, iceLevel: $iceLevel}) {
+    errors {
+      type
+      field
+      message
+    }
+    boba {
+      _id
+      drinkName
+      sugarLevel
+      iceLevel
+    }
+  }
+}
+    `;
+
+export function useAddBobaMutation() {
+  return Urql.useMutation<AddBobaMutation, AddBobaMutationVariables>(AddBobaDocument);
+};
 export const ChangePasswordDocument = gql`
     mutation ChangePassword($password: String!, $token: String!) {
   changePassword(password: $password, token: $token) {

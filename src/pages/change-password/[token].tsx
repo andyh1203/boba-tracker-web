@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { NextPage } from "next";
 import { Wrapper } from "../../components/Wrapper";
 import { InputField } from "../../components/InputField";
 import { useForm } from "react-hook-form";
@@ -10,7 +9,7 @@ import { Box, Button, Link, Flex } from "@chakra-ui/core";
 import { useRouter } from "next/router";
 import NextLink from "next/link";
 
-const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
+const ChangePassword: React.FC = () => {
   const router = useRouter();
   const { handleSubmit, formState, errors, register, setError } = useForm();
   const [, changePassword] = useChangePasswordMutation();
@@ -23,7 +22,10 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
         message: "Passwords do not match!",
       });
     }
-    const response = await changePassword({ password, token });
+    const response = await changePassword({
+      password,
+      token: typeof router.query.token === "string" ? router.query.token : "",
+    });
     if (response.data?.changePassword?.errors) {
       response.data?.changePassword?.errors.forEach((error: any) => {
         const { field, type, message } = error;
@@ -88,12 +90,6 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
       ) : null}
     </Wrapper>
   );
-};
-
-ChangePassword.getInitialProps = ({ query }) => {
-  return {
-    token: query.token as string,
-  };
 };
 
 export default withUrqlClient(createUrqlClient)(ChangePassword);
