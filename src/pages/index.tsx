@@ -8,7 +8,11 @@ import NextLink from "next/link";
 import { Link } from "@chakra-ui/core";
 
 const Index = () => {
-  const [{ data }] = useBobasQuery();
+  const [{ data }] = useBobasQuery({
+    variables: {
+      limit: 10,
+    },
+  });
   return (
     <Layout>
       <NextLink href="add-boba">

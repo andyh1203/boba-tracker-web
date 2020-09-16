@@ -1,5 +1,5 @@
-query Bobas {
-  bobas {
+query Bobas($limit: Int!, $cursor: String) {
+  bobas(limit: $limit, cursor: $cursor) {
     ...CommonBoba
   }
 }

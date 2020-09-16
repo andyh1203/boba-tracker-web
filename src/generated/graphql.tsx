@@ -82,6 +82,12 @@ export type Query = {
   me?: Maybe<User>;
 };
 
+
+export type QueryBobasArgs = {
+  cursor?: Maybe<Scalars['String']>;
+  limit: Scalars['Int'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   addBoba: BobaResponse;
@@ -267,7 +273,10 @@ export type RegisterMutation = (
   ) }
 );
 
-export type BobasQueryVariables = Exact<{ [key: string]: never; }>;
+export type BobasQueryVariables = Exact<{
+  limit: Scalars['Int'];
+  cursor?: Maybe<Scalars['String']>;
+}>;
 
 
 export type BobasQuery = (
@@ -415,8 +424,8 @@ export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
 };
 export const BobasDocument = gql`
-    query Bobas {
-  bobas {
+    query Bobas($limit: Int!, $cursor: String) {
+  bobas(limit: $limit, cursor: $cursor) {
     ...CommonBoba
   }
 }
