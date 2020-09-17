@@ -2,28 +2,63 @@ import { NavBar } from "../components/NavBar";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { useBobasQuery } from "../generated/graphql";
-import React from "react";
+import React, { useState } from "react";
 import { Layout } from "../components/Layout";
 import NextLink from "next/link";
-import { Link } from "@chakra-ui/core";
+import { Box, Button, Flex, Heading, Link, Stack, Text } from "@chakra-ui/core";
 
 const Index = () => {
-  const [{ data }] = useBobasQuery({
-    variables: {
-      limit: 10,
-    },
+  const [variables, setVariables] = useState({
+    limit: 10,
+    cursor: null as null | string,
   });
+  const [{ data, fetching }] = useBobasQuery({
+    variables,
+  });
+
+  if (!fetching && !data) {
+    return <div>Query failed</div>;
+  }
+
   return (
     <Layout>
-      <NextLink href="add-boba">
-        <Link>Add Boba</Link>
-      </NextLink>
+      <Flex>
+        <Heading>Boba Tracker</Heading>{" "}
+        <NextLink href="add-boba">
+          <Link ml="auto">Add Boba</Link>
+        </NextLink>
+      </Flex>
       <br />
-      {!data ? (
+      {fetching && !data ? (
         <div>loading...</div>
       ) : (
-        data.bobas.map((p) => <div key={p._id}>{p.drinkName}</div>)
+        <Stack spacing={8}>
+          {data!.bobas.map((p) => (
+            <Box key={p._id} p={5} shadow="md" borderWidth="1px">
+              <Heading fontSize="xl">{p.drinkName}</Heading>
+              <Text mt={4}>
+                Ice: {p.iceLevel}, Sugar: {p.sugarLevel}
+              </Text>
+            </Box>
+          ))}
+        </Stack>
       )}
+      {data ? (
+        <Flex>
+          <Button
+            my={8}
+            isLoading={fetching}
+            onClick={() =>
+              setVariables({
+                limit: variables.limit,
+                cursor: data.bobas[data.bobas.length - 1].createdAt,
+              })
+            }
+          >
+            Load more
+          </Button>
+        </Flex>
+      ) : null}
     </Layout>
   );
 };

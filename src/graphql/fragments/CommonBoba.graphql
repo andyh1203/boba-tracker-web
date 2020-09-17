@@ -3,4 +3,6 @@ fragment CommonBoba on Boba {
   drinkName
   sugarLevel
   iceLevel
+  createdAt
+  updatedAt
 }

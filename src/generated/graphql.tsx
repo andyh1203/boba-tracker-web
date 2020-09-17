@@ -35,6 +35,7 @@ export type Boba = {
   user: User;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
+  drinkDescription: Scalars['String'];
 };
 
 export type FieldError = {
@@ -146,7 +147,7 @@ export type MutationRegisterArgs = {
 
 export type CommonBobaFragment = (
   { __typename?: 'Boba' }
-  & Pick<Boba, '_id' | 'drinkName' | 'sugarLevel' | 'iceLevel'>
+  & Pick<Boba, '_id' | 'drinkName' | 'sugarLevel' | 'iceLevel' | 'createdAt' | 'updatedAt'>
 );
 
 export type CommonErrorFragment = (
@@ -311,6 +312,8 @@ export const CommonBobaFragmentDoc = gql`
   drinkName
   sugarLevel
   iceLevel
+  createdAt
+  updatedAt
 }
     `;
 export const CommonUserFragmentDoc = gql`

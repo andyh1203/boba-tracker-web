@@ -11,7 +11,6 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
   const [{ data, fetching }] = useMeQuery({ pause: isServer() });
 
   let body = null;
-  console.log(data);
 
   if (fetching) {
   } else if (!data?.me) {
@@ -48,7 +47,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     );
   }
   return (
-    <Flex bg="tomato" p={4} ml={"auto"}>
+    <Flex zIndex={1} position="sticky" top={0} bg="#8BD3FA" p={4} ml={"auto"}>
       <Box ml={"auto"}>{body}</Box>
     </Flex>
   );
