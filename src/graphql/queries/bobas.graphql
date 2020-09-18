@@ -1,5 +1,12 @@
+# Write your query or mutation here
 query Bobas($limit: Int!, $cursor: String) {
   bobas(limit: $limit, cursor: $cursor) {
-    ...CommonBoba
+    hasMore
+    bobas {
+      ...CommonBoba
+      user {
+        ...CommonUser
+      }
+    }
   }
 }

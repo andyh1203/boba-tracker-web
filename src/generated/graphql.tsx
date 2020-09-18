@@ -63,6 +63,12 @@ export type UsersResponse = {
   users?: Maybe<Array<User>>;
 };
 
+export type PaginatedBobas = {
+  __typename?: 'PaginatedBobas';
+  bobas: Array<Boba>;
+  hasMore: Scalars['Boolean'];
+};
+
 export type BobaInput = {
   drinkName: Scalars['String'];
   sugarLevel: Scalars['String'];
@@ -78,7 +84,7 @@ export type RegisterUserInput = {
 
 export type Query = {
   __typename?: 'Query';
-  bobas: Array<Boba>;
+  bobas: PaginatedBobas;
   users: UsersResponse;
   me?: Maybe<User>;
 };
@@ -282,10 +288,18 @@ export type BobasQueryVariables = Exact<{
 
 export type BobasQuery = (
   { __typename?: 'Query' }
-  & { bobas: Array<(
-    { __typename?: 'Boba' }
-    & CommonBobaFragment
-  )> }
+  & { bobas: (
+    { __typename?: 'PaginatedBobas' }
+    & Pick<PaginatedBobas, 'hasMore'>
+    & { bobas: Array<(
+      { __typename?: 'Boba' }
+      & { user: (
+        { __typename?: 'User' }
+        & CommonUserFragment
+      ) }
+      & CommonBobaFragment
+    )> }
+  ) }
 );
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
@@ -429,10 +443,17 @@ export function useRegisterMutation() {
 export const BobasDocument = gql`
     query Bobas($limit: Int!, $cursor: String) {
   bobas(limit: $limit, cursor: $cursor) {
-    ...CommonBoba
+    hasMore
+    bobas {
+      ...CommonBoba
+      user {
+        ...CommonUser
+      }
+    }
   }
 }
-    ${CommonBobaFragmentDoc}`;
+    ${CommonBobaFragmentDoc}
+${CommonUserFragmentDoc}`;
 
 export function useBobasQuery(options: Omit<Urql.UseQueryArgs<BobasQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<BobasQuery>({ query: BobasDocument, ...options });

@@ -9,7 +9,7 @@ import { Box, Button, Flex, Heading, Link, Stack, Text } from "@chakra-ui/core";
 
 const Index = () => {
   const [variables, setVariables] = useState({
-    limit: 10,
+    limit: 25,
     cursor: null as null | string,
   });
   const [{ data, fetching }] = useBobasQuery({
@@ -33,7 +33,7 @@ const Index = () => {
         <div>loading...</div>
       ) : (
         <Stack spacing={8}>
-          {data!.bobas.map((p) => (
+          {data!.bobas.bobas.map((p) => (
             <Box key={p._id} p={5} shadow="md" borderWidth="1px">
               <Heading fontSize="xl">{p.drinkName}</Heading>
               <Text mt={4}>
@@ -43,7 +43,7 @@ const Index = () => {
           ))}
         </Stack>
       )}
-      {data ? (
+      {data && data.bobas.hasMore ? (
         <Flex>
           <Button
             my={8}
@@ -51,7 +51,7 @@ const Index = () => {
             onClick={() =>
               setVariables({
                 limit: variables.limit,
-                cursor: data.bobas[data.bobas.length - 1].createdAt,
+                cursor: data.bobas.bobas[data.bobas.bobas.length - 1].createdAt,
               })
             }
           >
