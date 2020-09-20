@@ -86,6 +86,19 @@ export const createUrqlClient = (ssrExchange: any) => ({
               () => ({ me: null })
             );
           },
+          addBoba: (_result, _args, cache, _info) => { 
+            const allFields = cache.inspectFields("Query");
+            const fieldInfos = allFields.filter(
+              (info) => info.fieldName === "bobas"
+            )
+            fieldInfos.forEach((fi) => {
+              cache.invalidate(
+                'Query', 
+                'bobas', 
+                fi.arguments || {}
+              )
+            })
+          },
           login: (_result, _args, cache, _info) => {
             betterUpdateQuery<LoginMutation, MeQuery>(
               cache,

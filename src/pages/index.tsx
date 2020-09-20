@@ -36,6 +36,7 @@ const Index = () => {
           {data!.bobas.bobas.map((p) => (
             <Box key={p._id} p={5} shadow="md" borderWidth="1px">
               <Heading fontSize="xl">{p.drinkName}</Heading>
+              Added by {p.user.lastName}, {p.user.firstName}
               <Text mt={4}>
                 Ice: {p.iceLevel}, Sugar: {p.sugarLevel}
               </Text>
