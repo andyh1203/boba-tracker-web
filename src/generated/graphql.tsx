@@ -21,6 +21,7 @@ export type User = {
   lastName: Scalars['String'];
   email: Scalars['String'];
   bobas: Array<Boba>;
+  likes: Array<Scalars['String']>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
 };
@@ -33,6 +34,7 @@ export type Boba = {
   sugarLevel: Scalars['String'];
   iceLevel: Scalars['String'];
   user: User;
+  likes: Array<Scalars['String']>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
   drinkDescription: Scalars['String'];
@@ -98,6 +100,7 @@ export type QueryBobasArgs = {
 export type Mutation = {
   __typename?: 'Mutation';
   addBoba: BobaResponse;
+  likeBoba: Scalars['Boolean'];
   deleteBoba: Scalars['Boolean'];
   updateBoba: BobaResponse;
   login?: Maybe<UserResponse>;
@@ -111,6 +114,11 @@ export type Mutation = {
 
 export type MutationAddBobaArgs = {
   data: BobaInput;
+};
+
+
+export type MutationLikeBobaArgs = {
+  bobaId: Scalars['String'];
 };
 
 
@@ -151,9 +159,22 @@ export type MutationRegisterArgs = {
   data: RegisterUserInput;
 };
 
+export type BobaSectionSnippetFragment = (
+  { __typename?: 'Boba' }
+  & Pick<Boba, '_id' | 'drinkName' | 'sugarLevel' | 'iceLevel' | 'createdAt' | 'updatedAt' | 'likes' | 'drinkDescription'>
+  & { user: (
+    { __typename?: 'User' }
+    & CommonUserFragment
+  ) }
+);
+
 export type CommonBobaFragment = (
   { __typename?: 'Boba' }
-  & Pick<Boba, '_id' | 'drinkName' | 'sugarLevel' | 'iceLevel' | 'createdAt' | 'updatedAt'>
+  & Pick<Boba, '_id' | 'drinkName' | 'sugarLevel' | 'iceLevel' | 'createdAt' | 'updatedAt' | 'likes' | 'drinkDescription'>
+  & { user: (
+    { __typename?: 'User' }
+    & Pick<User, 'firstName' | 'lastName' | 'email'>
+  ) }
 );
 
 export type CommonErrorFragment = (
@@ -163,7 +184,7 @@ export type CommonErrorFragment = (
 
 export type CommonUserFragment = (
   { __typename?: 'User' }
-  & Pick<User, '_id' | 'email' | 'firstName' | 'lastName'>
+  & Pick<User, '_id' | 'email' | 'firstName' | 'lastName' | 'likes' | 'createdAt' | 'updatedAt'>
   & { bobas: Array<(
     { __typename?: 'Boba' }
     & CommonBobaFragment
@@ -242,6 +263,16 @@ export type ForgotPasswordMutation = (
   & Pick<Mutation, 'forgotPassword'>
 );
 
+export type LikeBobaMutationVariables = Exact<{
+  bobaId: Scalars['String'];
+}>;
+
+
+export type LikeBobaMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'likeBoba'>
+);
+
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
@@ -293,10 +324,6 @@ export type BobasQuery = (
     & Pick<PaginatedBobas, 'hasMore'>
     & { bobas: Array<(
       { __typename?: 'Boba' }
-      & { user: (
-        { __typename?: 'User' }
-        & CommonUserFragment
-      ) }
       & CommonBobaFragment
     )> }
   ) }
@@ -313,13 +340,6 @@ export type MeQuery = (
   )> }
 );
 
-export const CommonErrorFragmentDoc = gql`
-    fragment CommonError on FieldError {
-  type
-  field
-  message
-}
-    `;
 export const CommonBobaFragmentDoc = gql`
     fragment CommonBoba on Boba {
   _id
@@ -328,6 +348,13 @@ export const CommonBobaFragmentDoc = gql`
   iceLevel
   createdAt
   updatedAt
+  likes
+  drinkDescription
+  user {
+    firstName
+    lastName
+    email
+  }
 }
     `;
 export const CommonUserFragmentDoc = gql`
@@ -339,8 +366,33 @@ export const CommonUserFragmentDoc = gql`
   bobas {
     ...CommonBoba
   }
+  likes
+  createdAt
+  updatedAt
 }
     ${CommonBobaFragmentDoc}`;
+export const BobaSectionSnippetFragmentDoc = gql`
+    fragment BobaSectionSnippet on Boba {
+  _id
+  drinkName
+  sugarLevel
+  iceLevel
+  createdAt
+  updatedAt
+  likes
+  drinkDescription
+  user {
+    ...CommonUser
+  }
+}
+    ${CommonUserFragmentDoc}`;
+export const CommonErrorFragmentDoc = gql`
+    fragment CommonError on FieldError {
+  type
+  field
+  message
+}
+    `;
 export const CommonUserResponseFragmentDoc = gql`
     fragment CommonUserResponse on UserResponse {
   errors {
@@ -409,6 +461,15 @@ export const ForgotPasswordDocument = gql`
 export function useForgotPasswordMutation() {
   return Urql.useMutation<ForgotPasswordMutation, ForgotPasswordMutationVariables>(ForgotPasswordDocument);
 };
+export const LikeBobaDocument = gql`
+    mutation LikeBoba($bobaId: String!) {
+  likeBoba(bobaId: $bobaId)
+}
+    `;
+
+export function useLikeBobaMutation() {
+  return Urql.useMutation<LikeBobaMutation, LikeBobaMutationVariables>(LikeBobaDocument);
+};
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
@@ -446,14 +507,10 @@ export const BobasDocument = gql`
     hasMore
     bobas {
       ...CommonBoba
-      user {
-        ...CommonUser
-      }
     }
   }
 }
-    ${CommonBobaFragmentDoc}
-${CommonUserFragmentDoc}`;
+    ${CommonBobaFragmentDoc}`;
 
 export function useBobasQuery(options: Omit<Urql.UseQueryArgs<BobasQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<BobasQuery>({ query: BobasDocument, ...options });

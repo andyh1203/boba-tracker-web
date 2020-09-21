@@ -4,9 +4,6 @@ query Bobas($limit: Int!, $cursor: String) {
     hasMore
     bobas {
       ...CommonBoba
-      user {
-        ...CommonUser
-      }
     }
   }
 }

@@ -6,4 +6,7 @@ fragment CommonUser on User {
   bobas {
     ...CommonBoba
   }
+  likes
+  createdAt
+  updatedAt
 }

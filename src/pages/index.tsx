@@ -1,11 +1,11 @@
-import { NavBar } from "../components/NavBar";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { useBobasQuery } from "../generated/graphql";
 import React, { useState } from "react";
 import { Layout } from "../components/Layout";
 import NextLink from "next/link";
-import { Box, Button, Flex, Heading, Link, Stack, Text } from "@chakra-ui/core";
+import {  Button, Flex, Heading, Link, Stack } from "@chakra-ui/core";
+import { BobaInfo } from "../components/BobaInfo";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -33,14 +33,8 @@ const Index = () => {
         <div>loading...</div>
       ) : (
         <Stack spacing={8}>
-          {data!.bobas.bobas.map((p) => (
-            <Box key={p._id} p={5} shadow="md" borderWidth="1px">
-              <Heading fontSize="xl">{p.drinkName}</Heading>
-              Added by {p.user.lastName}, {p.user.firstName}
-              <Text mt={4}>
-                Ice: {p.iceLevel}, Sugar: {p.sugarLevel}
-              </Text>
-            </Box>
+          {data!.bobas.bobas.map((boba) => (
+            <BobaInfo boba={boba} />
           ))}
         </Stack>
       )}
