@@ -4,8 +4,8 @@ import { useBobasQuery } from "../generated/graphql";
 import React, { useState } from "react";
 import { Layout } from "../components/Layout";
 import NextLink from "next/link";
-import {  Button, Flex, Heading, Link, Stack } from "@chakra-ui/core";
-import { BobaInfo } from "../components/BobaInfo";
+import {  Button, Flex, Heading, Link, Stack, Box } from "@chakra-ui/core";
+import { Boba } from "../components/Boba";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -34,7 +34,9 @@ const Index = () => {
       ) : (
         <Stack spacing={8}>
           {data!.bobas.bobas.map((boba) => (
-            <BobaInfo boba={boba} />
+            <Box key={boba._id}>
+              <Boba boba={boba} />
+            </Box>  
           ))}
         </Stack>
       )}

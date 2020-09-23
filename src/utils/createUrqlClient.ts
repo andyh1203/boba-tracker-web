@@ -1,17 +1,15 @@
-import { dedupExchange, fetchExchange, stringifyVariables } from "urql";
 import { cacheExchange, Resolver } from "@urql/exchange-graphcache";
+import Router from "next/router";
+import { dedupExchange, Exchange, fetchExchange, stringifyVariables } from "urql";
+import { pipe, tap } from "wonka";
 import {
-  LogoutMutation,
-  MeQuery,
-  MeDocument,
-  LoginMutation,
-  RegisterMutation,
+  BobasDocument, BobasQuery, LikeBobaMutation, LikeBobaMutationVariables, LoginMutation, LogoutMutation,
+  MeDocument, MeQuery,
+  RegisterMutation
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
+import gql from "graphql-tag";
 
-import { pipe, tap } from "wonka";
-import { Exchange } from "urql";
-import Router from "next/router";
 
 const errorExchange: Exchange = ({ forward }) => (ops$) => {
   return pipe(
@@ -99,19 +97,57 @@ export const createUrqlClient = (ssrExchange: any) => ({
               )
             })
           },
-          // likeBoba: (_result, _args, cache, _info) => { 
-          //   const allFields = cache.inspectFields("Query");
-          //   const fieldInfos = allFields.filter(
-          //     (info) => info.fieldName === "bobas"
-          //   )
-          //   fieldInfos.forEach((fi) => {
-          //     cache.invalidate(
-          //       'Query', 
-          //       'bobas', 
-          //       fi.arguments || {}
-          //     )
-          //   })
-          // },
+          likeBoba: (result, args, cache, _info) => { 
+            const {bobaId} = args as LikeBobaMutationVariables;
+            const data = cache.readFragment(
+              gql`
+                fragment _ on Boba {
+                  _id
+                  likes
+                }
+              `,
+              {_id: bobaId} as any
+            )
+            // Somehow need to access "me" here 
+            if (data && result.likeBoba) {
+              const userId = result.likeBoba;
+              cache.writeFragment(
+                gql`
+                  fragment __ on Boba {
+                    _id
+                    likes
+                  }
+                `,
+                {_id: bobaId, likes: [...data.likes, userId]} as any
+              )
+            }
+          },
+          dislikeBoba: (result, args, cache, _info) => { 
+            const {bobaId} = args as LikeBobaMutationVariables;
+            const data = cache.readFragment(
+              gql`
+                fragment _ on Boba {
+                  _id
+                  likes
+                }
+              `,
+              {_id: bobaId} as any
+            )
+            console.log(result);
+            console.log(args)
+            if (data) {
+              const userId = result.dislikeBoba;
+              cache.writeFragment(
+                gql`
+                  fragment __ on Boba {
+                    _id
+                    likes
+                  }
+                `,
+                {_id: bobaId, likes: data.likes.filter(l => l !== userId)} as any
+              )
+            }
+          },
           login: (_result, _args, cache, _info) => {
             betterUpdateQuery<LoginMutation, MeQuery>(
               cache,

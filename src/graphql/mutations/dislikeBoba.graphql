@@ -1,0 +1,3 @@
+mutation DislikeBoba($bobaId: String!) {
+  dislikeBoba(bobaId: $bobaId)
+}
