@@ -101,7 +101,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   addBoba: BobaResponse;
   likeBoba: Scalars['String'];
-  dislikeBoba: Scalars['Boolean'];
+  dislikeBoba: Scalars['String'];
   deleteBoba: Scalars['Boolean'];
   updateBoba: BobaResponse;
   login?: Maybe<UserResponse>;
@@ -170,7 +170,7 @@ export type CommonBobaFragment = (
   & Pick<Boba, '_id' | 'drinkName' | 'sugarLevel' | 'iceLevel' | 'createdAt' | 'updatedAt' | 'likes' | 'drinkDescription'>
   & { user: (
     { __typename?: 'User' }
-    & Pick<User, 'firstName' | 'lastName' | 'email'>
+    & Pick<User, '_id' | 'firstName' | 'lastName' | 'email'>
   ) }
 );
 
@@ -365,6 +365,7 @@ export const CommonBobaFragmentDoc = gql`
   likes
   drinkDescription
   user {
+    _id
     firstName
     lastName
     email

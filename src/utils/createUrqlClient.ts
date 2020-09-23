@@ -9,6 +9,7 @@ import {
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import gql from "graphql-tag";
+import { isServer } from "./isServer";
 
 
 const errorExchange: Exchange = ({ forward }) => (ops$) => {
@@ -58,133 +59,142 @@ export const cursorPagination = (): Resolver => {
   };
 };
 
-export const createUrqlClient = (ssrExchange: any) => ({
-  url: "http://localhost:4000/graphql",
-  fetchOptions: {
-    credentials: "include" as const,
-  },
-  exchanges: [
-    dedupExchange,
-    cacheExchange({
-      keys: {
-        PaginatedBoba: () => null,
-      },
-      resolvers: {
-        Query: {
-          bobas: cursorPagination(),
+export const createUrqlClient = (ssrExchange: any, ctx: any) => {
+  let cookie = "";
+
+  if (isServer()) {
+    cookie = ctx?.req.headers.cookie;
+  }
+
+  return {
+    url: "http://localhost:4000/graphql",
+    fetchOptions: {
+      credentials: "include" as const,
+      headers: cookie ? { cookie } : undefined
+    },
+    exchanges: [
+      dedupExchange,
+      cacheExchange({
+        keys: {
+          PaginatedBoba: () => null,
         },
-      },
-      updates: {
-        Mutation: {
-          logout: (_result, _args, cache, _info) => {
-            betterUpdateQuery<LogoutMutation, MeQuery>(
-              cache,
-              { query: MeDocument },
-              _result,
-              () => ({ me: null })
-            );
+        resolvers: {
+          Query: {
+            bobas: cursorPagination(),
           },
-          addBoba: (_result, _args, cache, _info) => { 
-            const allFields = cache.inspectFields("Query");
-            const fieldInfos = allFields.filter(
-              (info) => info.fieldName === "bobas"
-            )
-            fieldInfos.forEach((fi) => {
-              cache.invalidate(
-                'Query', 
-                'bobas', 
-                fi.arguments || {}
+        },
+        updates: {
+          Mutation: {
+            logout: (_result, _args, cache, _info) => {
+              betterUpdateQuery<LogoutMutation, MeQuery>(
+                cache,
+                { query: MeDocument },
+                _result,
+                () => ({ me: null })
+              );
+            },
+            addBoba: (_result, _args, cache, _info) => { 
+              const allFields = cache.inspectFields("Query");
+              const fieldInfos = allFields.filter(
+                (info) => info.fieldName === "bobas"
               )
-            })
-          },
-          likeBoba: (result, args, cache, _info) => { 
-            const {bobaId} = args as LikeBobaMutationVariables;
-            const data = cache.readFragment(
-              gql`
-                fragment _ on Boba {
-                  _id
-                  likes
-                }
-              `,
-              {_id: bobaId} as any
-            )
-            // Somehow need to access "me" here 
-            if (data && result.likeBoba) {
-              const userId = result.likeBoba;
-              cache.writeFragment(
+              fieldInfos.forEach((fi) => {
+                cache.invalidate(
+                  'Query', 
+                  'bobas', 
+                  fi.arguments || {}
+                )
+              })
+            },
+            likeBoba: (result, args, cache, _info) => { 
+              const {bobaId} = args as LikeBobaMutationVariables;
+              const data = cache.readFragment(
                 gql`
-                  fragment __ on Boba {
+                  fragment _ on Boba {
                     _id
                     likes
                   }
                 `,
-                {_id: bobaId, likes: [...data.likes, userId]} as any
+                {_id: bobaId} as any
               )
-            }
-          },
-          dislikeBoba: (result, args, cache, _info) => { 
-            const {bobaId} = args as LikeBobaMutationVariables;
-            const data = cache.readFragment(
-              gql`
-                fragment _ on Boba {
-                  _id
-                  likes
-                }
-              `,
-              {_id: bobaId} as any
-            )
-            console.log(result);
-            console.log(args)
-            if (data) {
-              const userId = result.dislikeBoba;
-              cache.writeFragment(
+              // Somehow need to access "me" here 
+              if (data && result.likeBoba) {
+                const userId = result.likeBoba;
+                cache.writeFragment(
+                  gql`
+                    fragment __ on Boba {
+                      _id
+                      likes
+                    }
+                  `,
+                  {_id: bobaId, likes: [...data.likes, userId]} as any
+                )
+              }
+            },
+            dislikeBoba: (result, args, cache, _info) => { 
+              const {bobaId} = args as LikeBobaMutationVariables;
+              const data = cache.readFragment(
                 gql`
-                  fragment __ on Boba {
+                  fragment _ on Boba {
                     _id
                     likes
                   }
                 `,
-                {_id: bobaId, likes: data.likes.filter(l => l !== userId)} as any
+                {_id: bobaId} as any
               )
-            }
-          },
-          login: (_result, _args, cache, _info) => {
-            betterUpdateQuery<LoginMutation, MeQuery>(
-              cache,
-              { query: MeDocument },
-              _result,
-              (result, query) => {
-                if (!result.login) {
-                  return query;
-                } else {
-                  return {
-                    me: result.login.user,
-                  };
-                }
+              console.log(result);
+              console.log(args)
+              if (data) {
+                const userId = result.dislikeBoba;
+                cache.writeFragment(
+                  gql`
+                    fragment __ on Boba {
+                      _id
+                      likes
+                    }
+                  `,
+                  {_id: bobaId, likes: data.likes.filter(l => l !== userId)} as any
+                )
               }
-            );
-          },
-          register: (_result, _args, cache, _info) => {
-            betterUpdateQuery<RegisterMutation, MeQuery>(
-              cache,
-              { query: MeDocument },
-              _result,
-              (result, query) => {
-                if (!result.register) {
-                  return query;
-                } else {
-                  return {
-                    me: result.register.user,
-                  };
+            },
+            login: (_result, _args, cache, _info) => {
+              betterUpdateQuery<LoginMutation, MeQuery>(
+                cache,
+                { query: MeDocument },
+                _result,
+                (result, query) => {
+                  if (!result.login) {
+                    return query;
+                  } else {
+                    return {
+                      me: result.login.user,
+                    };
+                  }
                 }
-              }
-            );
+              );
+            },
+            register: (_result, _args, cache, _info) => {
+              betterUpdateQuery<RegisterMutation, MeQuery>(
+                cache,
+                { query: MeDocument },
+                _result,
+                (result, query) => {
+                  if (!result.register) {
+                    return query;
+                  } else {
+                    return {
+                      me: result.register.user,
+                    };
+                  }
+                }
+              );
+            },
           },
         },
-      },
-    }),
-    errorExchange,
-    ssrExchange,
-    fetchExchange,
-  ],
-});
+      }),
+      errorExchange,
+      ssrExchange,
+      fetchExchange,
+    ],
+  }
+};
