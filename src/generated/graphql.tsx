@@ -87,6 +87,7 @@ export type RegisterUserInput = {
 export type Query = {
   __typename?: 'Query';
   bobas: PaginatedBobas;
+  boba: Boba;
   users: UsersResponse;
   me?: Maybe<User>;
 };
@@ -95,6 +96,11 @@ export type Query = {
 export type QueryBobasArgs = {
   cursor?: Maybe<Scalars['String']>;
   limit: Scalars['Int'];
+};
+
+
+export type QueryBobaArgs = {
+  bobaId: Scalars['String'];
 };
 
 export type Mutation = {
@@ -318,6 +324,19 @@ export type RegisterMutation = (
   ) }
 );
 
+export type BobaQueryVariables = Exact<{
+  bobaId: Scalars['String'];
+}>;
+
+
+export type BobaQuery = (
+  { __typename?: 'Query' }
+  & { boba: (
+    { __typename?: 'Boba' }
+    & CommonBobaFragment
+  ) }
+);
+
 export type BobasQueryVariables = Exact<{
   limit: Scalars['Int'];
   cursor?: Maybe<Scalars['String']>;
@@ -502,6 +521,17 @@ export const RegisterDocument = gql`
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const BobaDocument = gql`
+    query Boba($bobaId: String!) {
+  boba(bobaId: $bobaId) {
+    ...CommonBoba
+  }
+}
+    ${CommonBobaFragmentDoc}`;
+
+export function useBobaQuery(options: Omit<Urql.UseQueryArgs<BobaQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<BobaQuery>({ query: BobaDocument, ...options });
 };
 export const BobasDocument = gql`
     query Bobas($limit: Int!, $cursor: String) {

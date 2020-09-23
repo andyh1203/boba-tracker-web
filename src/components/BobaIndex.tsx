@@ -4,11 +4,11 @@ import { useLikeBobaMutation, useMeQuery, CommonBobaFragment, useDislikeBobaMuta
 import { isServer } from '../utils/isServer';
 import {AiOutlineLike, AiFillLike} from 'react-icons/ai';
 
-interface BobaProps {
+interface BobaIndexProps {
     boba: CommonBobaFragment 
 }
 
-export const Boba: React.FC<BobaProps> = ({boba}) => {
+export const BobaIndex: React.FC<BobaIndexProps> = ({boba}) => {
     const [loading, setLoading] = useState<'like-loading' | 'dislike-loading' | 'not-loading'>('not-loading');
     const [{ data: me }] = useMeQuery({ pause: isServer() });
     const [, likeBoba]  = useLikeBobaMutation()

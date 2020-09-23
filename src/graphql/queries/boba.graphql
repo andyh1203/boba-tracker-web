@@ -1,0 +1,5 @@
+query Boba($bobaId: String!) {
+  boba(bobaId: $bobaId) {
+    ...CommonBoba
+  }
+}
