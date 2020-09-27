@@ -3,8 +3,7 @@ import { createUrqlClient } from "../utils/createUrqlClient";
 import { useBobasQuery } from "../generated/graphql";
 import React, { useState } from "react";
 import { Layout } from "../components/Layout";
-import NextLink from "next/link";
-import {  Button, Flex, Heading, Link, Stack, Box } from "@chakra-ui/core";
+import {  Button, Flex, Stack, Box } from "@chakra-ui/core";
 import { BobaIndex } from "../components/BobaIndex";
 
 const Index = () => {
@@ -22,18 +21,12 @@ const Index = () => {
 
   return (
     <Layout>
-      <Flex>
-        <Heading>Boba Tracker</Heading>{" "}
-        <NextLink href="add-boba">
-          <Link ml="auto">Add Boba</Link>
-        </NextLink>
-      </Flex>
       <br />
       {fetching && !data ? (
         <div>loading...</div>
       ) : (
         <Stack spacing={8}>
-          {data!.bobas.bobas.map((boba) => (
+          {data!.bobas.bobas.map((boba) => !boba ? null : (
             <Box key={boba._id}>
               <BobaIndex boba={boba} />
             </Box>  

@@ -1,0 +1,3 @@
+mutation DeleteBoba($bobaId: String!) {
+  deleteBoba(bobaId: $bobaId)
+}

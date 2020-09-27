@@ -3,13 +3,14 @@ import Router from "next/router";
 import { dedupExchange, Exchange, fetchExchange, stringifyVariables } from "urql";
 import { pipe, tap } from "wonka";
 import {
-  BobasDocument, BobasQuery, LikeBobaMutation, LikeBobaMutationVariables, LoginMutation, LogoutMutation,
+  BobasDocument, BobasQuery, DeleteBobaMutation, DeleteBobaMutationVariables, LikeBobaMutation, LikeBobaMutationVariables, LoginMutation, LogoutMutation,
   MeDocument, MeQuery,
   RegisterMutation
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import gql from "graphql-tag";
 import { isServer } from "./isServer";
+import { argsToArgsConfig } from "graphql/type/definition";
 
 
 const errorExchange: Exchange = ({ forward }) => (ops$) => {
@@ -85,6 +86,9 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
         },
         updates: {
           Mutation: {
+            deleteBoba: (_result, args, cache, _info) => {
+                cache.invalidate({__typename: "Boba", _id: (args as DeleteBobaMutationVariables).bobaId})
+            },
             logout: (_result, _args, cache, _info) => {
               betterUpdateQuery<LogoutMutation, MeQuery>(
                 cache,
@@ -142,8 +146,6 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                 `,
                 {_id: bobaId} as any
               )
-              console.log(result);
-              console.log(args)
               if (data) {
                 const userId = result.dislikeBoba;
                 cache.writeFragment(

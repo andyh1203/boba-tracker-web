@@ -256,6 +256,16 @@ export type ConfirmMutation = (
   & Pick<Mutation, 'confirmUser'>
 );
 
+export type DeleteBobaMutationVariables = Exact<{
+  bobaId: Scalars['String'];
+}>;
+
+
+export type DeleteBobaMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'deleteBoba'>
+);
+
 export type DislikeBobaMutationVariables = Exact<{
   bobaId: Scalars['String'];
 }>;
@@ -321,6 +331,26 @@ export type RegisterMutation = (
   & { register: (
     { __typename?: 'UserResponse' }
     & CommonUserResponseFragment
+  ) }
+);
+
+export type UpdateBobaMutationVariables = Exact<{
+  bobaId: Scalars['String'];
+  updatedInput: BobaInput;
+}>;
+
+
+export type UpdateBobaMutation = (
+  { __typename?: 'Mutation' }
+  & { updateBoba: (
+    { __typename?: 'BobaResponse' }
+    & { boba?: Maybe<(
+      { __typename?: 'Boba' }
+      & CommonBobaFragment
+    )>, errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & CommonErrorFragment
+    )>> }
   ) }
 );
 
@@ -464,6 +494,15 @@ export const ConfirmDocument = gql`
 export function useConfirmMutation() {
   return Urql.useMutation<ConfirmMutation, ConfirmMutationVariables>(ConfirmDocument);
 };
+export const DeleteBobaDocument = gql`
+    mutation DeleteBoba($bobaId: String!) {
+  deleteBoba(bobaId: $bobaId)
+}
+    `;
+
+export function useDeleteBobaMutation() {
+  return Urql.useMutation<DeleteBobaMutation, DeleteBobaMutationVariables>(DeleteBobaDocument);
+};
 export const DislikeBobaDocument = gql`
     mutation DislikeBoba($bobaId: String!) {
   dislikeBoba(bobaId: $bobaId)
@@ -521,6 +560,23 @@ export const RegisterDocument = gql`
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const UpdateBobaDocument = gql`
+    mutation UpdateBoba($bobaId: String!, $updatedInput: BobaInput!) {
+  updateBoba(bobaId: $bobaId, updatedInput: $updatedInput) {
+    boba {
+      ...CommonBoba
+    }
+    errors {
+      ...CommonError
+    }
+  }
+}
+    ${CommonBobaFragmentDoc}
+${CommonErrorFragmentDoc}`;
+
+export function useUpdateBobaMutation() {
+  return Urql.useMutation<UpdateBobaMutation, UpdateBobaMutationVariables>(UpdateBobaDocument);
 };
 export const BobaDocument = gql`
     query Boba($bobaId: String!) {

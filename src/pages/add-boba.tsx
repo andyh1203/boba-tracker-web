@@ -28,22 +28,6 @@ export const AddBoba: React.FC<AddBobaProps> = ({}) => {
     if (!error) {
       router.push("/");
     }
-    // clearErrors();
-    // const response = await AddBoba(values);
-    // if (response.data?.AddBoba?.errors) {
-    //   response.data?.AddBoba?.errors.forEach((error: any) => {
-    //     const { field, type, message } = error;
-    //     setError(field, {
-    //       type,
-    //       message,
-    //     });
-    //   });
-    // } else if (response.data?.AddBoba?.user) {
-    //   router.push("/");
-    // } else {
-    //   setAlert("Something went wrong");
-    //   setTimeout(() => setAlert(null), 5000);
-    // }
   };
 
   return (

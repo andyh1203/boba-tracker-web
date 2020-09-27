@@ -1,0 +1,10 @@
+mutation UpdateBoba($bobaId: String!, $updatedInput: BobaInput!) {
+  updateBoba(bobaId: $bobaId, updatedInput: $updatedInput) {
+    boba {
+      ...CommonBoba
+    }
+    errors {
+      ...CommonError
+    }
+  }
+}

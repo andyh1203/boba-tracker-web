@@ -1,58 +1,103 @@
-import { Box, Heading, Text, IconButton } from '@chakra-ui/core'
+import { Box, Heading, Text, IconButton, Link, Flex } from '@chakra-ui/core'
 import React, { useState } from 'react'
-import { useLikeBobaMutation, useMeQuery, CommonBobaFragment, useDislikeBobaMutation } from '../generated/graphql'
+import { useLikeBobaMutation, useMeQuery, CommonBobaFragment, useDislikeBobaMutation, useDeleteBobaMutation } from '../generated/graphql'
 import { isServer } from '../utils/isServer';
-import {AiOutlineLike, AiFillLike} from 'react-icons/ai';
+import {AiOutlineLike, AiFillLike, AiFillDelete, AiFillEdit} from 'react-icons/ai';
+import NextLink from "next/link";
+import { useRouter } from 'next/router';
 
 interface BobaIndexProps {
     boba: CommonBobaFragment 
 }
 
 export const BobaIndex: React.FC<BobaIndexProps> = ({boba}) => {
-    const [loading, setLoading] = useState<'like-loading' | 'dislike-loading' | 'not-loading'>('not-loading');
+    const [likeLoading, setLikeLoading] = useState<'like-loading' | 'dislike-loading' | 'not-loading'>('not-loading');
+    const [deleteLoading, setDeleteLoading] = useState<'delete-loading' | 'not-loading'>("not-loading")
     const [{ data: me }] = useMeQuery({ pause: isServer() });
     const [, likeBoba]  = useLikeBobaMutation()
     const [, dislikeBoba] = useDislikeBobaMutation()
+    const [, deleteBoba] = useDeleteBobaMutation()
+    const router = useRouter();
     
   return (
     <Box p={5} shadow="md" borderWidth="1px">
-    <Heading fontSize="xl">{boba.drinkName}</Heading>
+    <Heading fontSize="xl">
+    <NextLink href="/boba/[id]" as={`/boba/${boba._id}`}>
+      <Link>
+      {boba.drinkName}
+      </Link>
+      </NextLink> 
+    </Heading>
     Added by {boba.user.lastName}, {boba.user.firstName}
     <Text mt={4}>
     Ice: {boba.iceLevel}, Sugar: {boba.sugarLevel}
     </Text>
-    <Box>
+    <Flex ml={"auto"}>
     {
       me?.me && !boba.likes.includes(me.me!._id) 
       ? <IconButton 
           mr={2} 
-          isLoading={loading === 'like-loading'} 
+          isLoading={likeLoading === 'like-loading'} 
           aria-label="like" 
           as={AiOutlineLike} 
           onClick={async () => {
-            setLoading('like-loading');
+            setLikeLoading('like-loading');
             await likeBoba({bobaId: boba._id});
-            setLoading('not-loading')
+            setLikeLoading('not-loading')
           }} 
           size="xs" 
           variant="outline"
         />
       : <IconButton 
           mr={2} 
-          isLoading={loading === 'dislike-loading'} 
+          isLoading={likeLoading === 'dislike-loading'} 
           aria-label="like" 
           as={AiFillLike} 
           onClick={async () => {
-            setLoading('dislike-loading');
+            setLikeLoading('dislike-loading');
             await dislikeBoba({bobaId: boba._id});
-            setLoading('not-loading')
+            setLikeLoading('not-loading')
           }} 
           size="xs" 
           variant="outline"
         />
     }
-    <b>{boba.likes.length}</b>
-    </Box>
+        <b>{boba.likes.length}</b>
+      <Flex flex={1} m="auto" justifyContent="flex-end">
+      {
+        me?.me && boba.user._id.toString() === me?.me._id.toString() 
+        ?  (
+          <>
+            <NextLink href="/boba/edit/[id]" as={`/boba/edit/${boba._id}`}>
+            <IconButton 
+              aria-label="update" 
+              as={AiFillEdit} 
+              onClick={async () => {
+                router.push(`/boba/edit/${boba._id}`)
+              }} 
+              size="xs" 
+              variant="outline"
+              
+            />
+            </NextLink> 
+          <IconButton 
+              isLoading={deleteLoading === 'delete-loading'} 
+              aria-label="delete" 
+              as={AiFillDelete} 
+              onClick={async () => {
+                setDeleteLoading("delete-loading")
+                await deleteBoba({bobaId: boba._id})
+                setDeleteLoading("not-loading")
+              }} 
+              size="xs" 
+              variant="outline"
+              
+            />
+            </>
+          ) : <></>
+      }
+      </Flex>
+    </Flex>
   </Box>
   )
 }
