@@ -27,7 +27,7 @@ export const EditBoba: React.FC<EditBobaProps> = ({}) => {
     const onSubmit = async (values: any) => {
         const { error } = await updateBoba({bobaId: router.query.id as string, updatedInput: values});
         if (!error) {
-          router.push("/");
+          router.back();
         }
     }
 

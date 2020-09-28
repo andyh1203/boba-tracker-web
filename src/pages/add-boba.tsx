@@ -32,12 +32,6 @@ export const AddBoba: React.FC<AddBobaProps> = ({}) => {
 
   return (
     <Layout variant="small">
-      {/* {alert && (
-        <Alert status="error">
-          <AlertIcon />
-          {alert}
-        </Alert>
-      )} */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <InputField
           name="drinkName"

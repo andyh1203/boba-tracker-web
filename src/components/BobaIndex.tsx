@@ -1,10 +1,10 @@
-import { Box, Heading, Text, IconButton, Link, Flex } from '@chakra-ui/core'
-import React, { useState } from 'react'
-import { useLikeBobaMutation, useMeQuery, CommonBobaFragment, useDislikeBobaMutation, useDeleteBobaMutation } from '../generated/graphql'
-import { isServer } from '../utils/isServer';
-import {AiOutlineLike, AiFillLike, AiFillDelete, AiFillEdit} from 'react-icons/ai';
+import { Box, Flex, Heading, IconButton, Link, Text } from '@chakra-ui/core';
 import NextLink from "next/link";
-import { useRouter } from 'next/router';
+import React, { useState } from 'react';
+import { AiFillLike, AiOutlineLike } from 'react-icons/ai';
+import { CommonBobaFragment, useDislikeBobaMutation, useLikeBobaMutation, useMeQuery } from '../generated/graphql';
+import { isServer } from '../utils/isServer';
+import { EditDeleteBobaButton } from './EditDeleteBobaButton';
 
 interface BobaIndexProps {
     boba: CommonBobaFragment 
@@ -12,12 +12,10 @@ interface BobaIndexProps {
 
 export const BobaIndex: React.FC<BobaIndexProps> = ({boba}) => {
     const [likeLoading, setLikeLoading] = useState<'like-loading' | 'dislike-loading' | 'not-loading'>('not-loading');
-    const [deleteLoading, setDeleteLoading] = useState<'delete-loading' | 'not-loading'>("not-loading")
+
     const [{ data: me }] = useMeQuery({ pause: isServer() });
     const [, likeBoba]  = useLikeBobaMutation()
     const [, dislikeBoba] = useDislikeBobaMutation()
-    const [, deleteBoba] = useDeleteBobaMutation()
-    const router = useRouter();
     
   return (
     <Box p={5} shadow="md" borderWidth="1px">
@@ -64,38 +62,7 @@ export const BobaIndex: React.FC<BobaIndexProps> = ({boba}) => {
     }
         <b>{boba.likes.length}</b>
       <Flex flex={1} m="auto" justifyContent="flex-end">
-      {
-        me?.me && boba.user._id.toString() === me?.me._id.toString() 
-        ?  (
-          <>
-            <NextLink href="/boba/edit/[id]" as={`/boba/edit/${boba._id}`}>
-            <IconButton 
-              aria-label="update" 
-              as={AiFillEdit} 
-              onClick={async () => {
-                router.push(`/boba/edit/${boba._id}`)
-              }} 
-              size="xs" 
-              variant="outline"
-              
-            />
-            </NextLink> 
-          <IconButton 
-              isLoading={deleteLoading === 'delete-loading'} 
-              aria-label="delete" 
-              as={AiFillDelete} 
-              onClick={async () => {
-                setDeleteLoading("delete-loading")
-                await deleteBoba({bobaId: boba._id})
-                setDeleteLoading("not-loading")
-              }} 
-              size="xs" 
-              variant="outline"
-              
-            />
-            </>
-          ) : <></>
-      }
+      <EditDeleteBobaButton boba={boba}/>
       </Flex>
     </Flex>
   </Box>

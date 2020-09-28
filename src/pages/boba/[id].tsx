@@ -3,6 +3,7 @@ import Heading from '@chakra-ui/core/dist/Heading';
 import { withUrqlClient } from 'next-urql';
 import { Router, useRouter } from 'next/router';
 import React from 'react'
+import { EditDeleteBobaButton } from '../../components/EditDeleteBobaButton';
 import { Layout } from '../../components/Layout';
 import { useBobaQuery } from '../../generated/graphql';
 import { createUrqlClient } from '../../utils/createUrqlClient';
@@ -37,6 +38,9 @@ export const Boba: React.FC<BobaProps> = ({}) => {
       <Layout>
           <Heading>{data?.boba.drinkName}</Heading>
           {data?.boba.drinkName}
+          <Box m='auto'>
+          <EditDeleteBobaButton boba={data!.boba} />
+          </Box>
       </Layout>
   )
 }
