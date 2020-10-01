@@ -1,7 +1,7 @@
 import Box from '@chakra-ui/core/dist/Box';
 import Heading from '@chakra-ui/core/dist/Heading';
 import { withUrqlClient } from 'next-urql';
-import { Router, useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import React from 'react'
 import { EditDeleteBobaButton } from '../../components/EditDeleteBobaButton';
 import { Layout } from '../../components/Layout';

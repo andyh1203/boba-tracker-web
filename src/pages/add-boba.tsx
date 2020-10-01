@@ -17,8 +17,6 @@ export const AddBoba: React.FC<AddBobaProps> = ({}) => {
     formState,
     errors,
     register,
-    setError,
-    clearErrors,
   } = useForm();
   const [, addBoba] = useAddBobaMutation();
   const router = useRouter();

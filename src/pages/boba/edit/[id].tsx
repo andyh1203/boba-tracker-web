@@ -1,8 +1,8 @@
 import React, {useEffect} from 'react';
-import Router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import { Layout } from '../../../components/Layout';
 import { useIsAuth } from '../../../utils/useIsAuth';
-import { useAddBobaMutation, useBobaQuery, useUpdateBobaMutation } from '../../../generated/graphql';
+import { useBobaQuery, useUpdateBobaMutation } from '../../../generated/graphql';
 import { useForm } from 'react-hook-form';
 import { InputField } from '../../../components/InputField';
 import { Box, Button } from '@chakra-ui/core';
@@ -17,8 +17,6 @@ export const EditBoba: React.FC<EditBobaProps> = ({}) => {
         formState,
         errors,
         register,
-        setError,
-        clearErrors,
         setValue
     } = useForm();
     const [, updateBoba] = useUpdateBobaMutation();

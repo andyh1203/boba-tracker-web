@@ -10,7 +10,7 @@ interface InputFieldProps {
   name: string;
   label: string;
   inputRefs?: any;
-  errors: Object;
+  errors: any;
   type?: string;
 }
 

@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 
 import { useForm } from "react-hook-form";
 import { Button } from "@chakra-ui/core";
 import { Wrapper } from "../components/Wrapper";
 import { InputField } from "../components/InputField";
 import { useRegisterMutation } from "../generated/graphql";
-import { Alert, AlertIcon } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
+import { useRouter } from "next/router";
+import { Layout } from "../components/Layout";
 
 interface RegisterProps {}
 
@@ -21,7 +22,7 @@ export const Register: React.FC<RegisterProps> = ({}) => {
     clearErrors,
   } = useForm();
   const [, registerUser] = useRegisterMutation();
-  const [alert, setAlert] = useState<String | null>(null);
+  const router = useRouter();
 
   const onSubmit = async (values: any) => {
     clearErrors();
@@ -35,63 +36,58 @@ export const Register: React.FC<RegisterProps> = ({}) => {
         });
       });
     } else {
-      setAlert(`A confirmation email has been sent to ${values.email}`);
-      setTimeout(() => setAlert(null), 5000);
+      router.push('/');
     }
   };
 
   return (
-    <Wrapper variant="small">
-      {alert && (
-        <Alert status="info">
-          <AlertIcon />
-          {alert}
-        </Alert>
-      )}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <InputField
-          name="firstName"
-          label="First Name"
-          errors={errors}
-          inputRefs={register({
-            required: "First Name Required",
-          })}
-        />
-        <InputField
-          name="lastName"
-          label="Last Name"
-          errors={errors}
-          inputRefs={register({
-            required: "Last Name Required",
-          })}
-        />
-        <InputField
-          name="email"
-          label="Email"
-          errors={errors}
-          inputRefs={register({
-            required: "Email Required",
-          })}
-        />
-        <InputField
-          name="password"
-          label="Password"
-          errors={errors}
-          type="password"
-          inputRefs={register({
-            required: "Password Required",
-          })}
-        />
-        <Button
-          mt={4}
-          variantColor="teal"
-          isLoading={formState.isSubmitting}
-          type="submit"
-        >
-          Register
-        </Button>
-      </form>
-    </Wrapper>
+    <Layout>
+      <Wrapper variant="small">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <InputField
+            name="firstName"
+            label="First Name"
+            errors={errors}
+            inputRefs={register({
+              required: "First Name Required",
+            })}
+          />
+          <InputField
+            name="lastName"
+            label="Last Name"
+            errors={errors}
+            inputRefs={register({
+              required: "Last Name Required",
+            })}
+          />
+          <InputField
+            name="email"
+            label="Email"
+            errors={errors}
+            inputRefs={register({
+              required: "Email Required",
+            })}
+          />
+          <InputField
+            name="password"
+            label="Password"
+            errors={errors}
+            type="password"
+            inputRefs={register({
+              required: "Password Required",
+            })}
+          />
+          <Button
+            mt={4}
+            variantColor="teal"
+            isLoading={formState.isSubmitting}
+            type="submit"
+          >
+            Register
+          </Button>
+        </form>
+      </Wrapper>
+    </Layout>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Boba, CommonBobaFragment, useDeleteBobaMutation, useMeQuery } from '../generated/graphql'
+import { CommonBobaFragment, useDeleteBobaMutation, useMeQuery } from '../generated/graphql'
 import { isServer } from '../utils/isServer';
 import NextLink from "next/link";
 import { IconButton } from '@chakra-ui/core';

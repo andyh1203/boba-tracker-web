@@ -10,6 +10,7 @@ import { Alert, AlertIcon, Box, Flex, Link } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import NextLink from "next/link";
+import { Layout } from "../components/Layout";
 
 interface LoginProps {}
 
@@ -50,48 +51,51 @@ export const Login: React.FC<LoginProps> = ({}) => {
   };
 
   return (
-    <Wrapper variant="small">
-      {alert && (
-        <Alert status="error">
-          <AlertIcon />
-          {alert}
-        </Alert>
-      )}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <InputField
-          name="email"
-          label="Email"
-          errors={errors}
-          inputRefs={register({
-            required: "Email Required",
-          })}
-        />
-        <InputField
-          name="password"
-          label="Password"
-          errors={errors}
-          type="password"
-          inputRefs={register({
-            required: "Password Required",
-          })}
-        />
-        <Flex ml={2}>
-          <Box ml="auto">
-            <NextLink href="/forgot-password">
-              <Link ml="auto">Forgot password?</Link>
-            </NextLink>
-          </Box>
-        </Flex>
-        <Button
-          mt={4}
-          variantColor="teal"
-          isLoading={formState.isSubmitting}
-          type="submit"
-        >
-          Login
-        </Button>
-      </form>
-    </Wrapper>
+    <Layout>
+      <Wrapper variant="small">
+        {alert && (
+          <Alert status="error">
+            <AlertIcon />
+            {alert}
+          </Alert>
+        )}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <InputField
+            name="email"
+            label="Email"
+            errors={errors}
+            inputRefs={register({
+              required: "Email Required",
+            })}
+          />
+          <InputField
+            name="password"
+            label="Password"
+            errors={errors}
+            type="password"
+            inputRefs={register({
+              required: "Password Required",
+            })}
+          />
+          <Flex ml={2}>
+            <Box ml="auto">
+              <NextLink href="/forgot-password">
+                <Link ml="auto">Forgot password?</Link>
+              </NextLink>
+            </Box>
+          </Flex>
+          <Button
+            mt={4}
+            variantColor="teal"
+            isLoading={formState.isSubmitting}
+            type="submit"
+          >
+            Login
+          </Button>
+        </form>
+      </Wrapper>
+    </Layout>
+   
   );
 };
 

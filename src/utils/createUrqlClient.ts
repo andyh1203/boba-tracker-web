@@ -3,14 +3,12 @@ import Router from "next/router";
 import { dedupExchange, Exchange, fetchExchange, stringifyVariables } from "urql";
 import { pipe, tap } from "wonka";
 import {
-  BobasDocument, BobasQuery, DeleteBobaMutation, DeleteBobaMutationVariables, LikeBobaMutation, LikeBobaMutationVariables, LoginMutation, LogoutMutation,
-  MeDocument, MeQuery,
-  RegisterMutation
+  DeleteBobaMutationVariables, LikeBobaMutationVariables, LoginMutation, LogoutMutation,
+  MeDocument, MeQuery
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import gql from "graphql-tag";
 import { isServer } from "./isServer";
-import { argsToArgsConfig } from "graphql/type/definition";
 
 
 const errorExchange: Exchange = ({ forward }) => (ops$) => {
@@ -68,7 +66,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   }
 
   return {
-    url: "http://localhost:4000/graphql",
+    url: process.env.NEXT_PUBLIC_API_URL as string,
     fetchOptions: {
       credentials: "include" as const,
       headers: cookie ? { cookie } : undefined
@@ -124,6 +122,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
               // Somehow need to access "me" here 
               if (data && result.likeBoba) {
                 const userId = result.likeBoba;
+                const existingLikes = data.likes as Array<String>
                 cache.writeFragment(
                   gql`
                     fragment __ on Boba {
@@ -131,7 +130,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                       likes
                     }
                   `,
-                  {_id: bobaId, likes: [...data.likes, userId]} as any
+                  {_id: bobaId, likes: [...existingLikes, userId]} as any
                 )
               }
             },
@@ -148,6 +147,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
               )
               if (data) {
                 const userId = result.dislikeBoba;
+                const likes = data.likes as Array<String>;
                 cache.writeFragment(
                   gql`
                     fragment __ on Boba {
@@ -155,7 +155,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                       likes
                     }
                   `,
-                  {_id: bobaId, likes: data.likes.filter(l => l !== userId)} as any
+                  {_id: bobaId, likes: likes.filter(l => l !== userId)} as any
                 )
               }
             },
@@ -175,22 +175,22 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                 }
               );
             },
-            register: (_result, _args, cache, _info) => {
-              betterUpdateQuery<RegisterMutation, MeQuery>(
-                cache,
-                { query: MeDocument },
-                _result,
-                (result, query) => {
-                  if (!result.register) {
-                    return query;
-                  } else {
-                    return {
-                      me: result.register.user,
-                    };
-                  }
-                }
-              );
-            },
+            // register: (_result, _args, cache, _info) => {
+            //   betterUpdateQuery<RegisterMutation, MeQuery>(
+            //     cache,
+            //     { query: MeDocument },
+            //     _result,
+            //     (result, query) => {
+            //       if (!result.register) {
+            //         return query;
+            //       } else {
+            //         return {
+            //           me: result.register.user,
+            //         };
+            //       }
+            //     }
+            //   );
+            // },
           },
         },
       }),
